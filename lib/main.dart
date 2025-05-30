@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'BookScreen.dart';
 
 void main() {
   runApp(ChildBookApp());
@@ -24,17 +25,10 @@ class AgeSelectionScreen extends StatelessWidget {
     {'age': '8-12', 'type': 'PDF', 'image': 'assets/images/ages_8_12.png'},
   ];
 
-  final String wordIconUrl =
-      'https://img.icons8.com/color/96/000000/ms-word.png'; // made bigger (96px)
-  final String pdfIconUrl =
-      'https://img.icons8.com/color/96/000000/pdf.png'; // made bigger (96px)
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Child Book App'),
-      ),
+      appBar: AppBar(title: const Text('Child Book App')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -42,38 +36,7 @@ class AgeSelectionScreen extends StatelessWidget {
           children: [
             const Text(
               'Choose your child\'s age:',
-              style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Column(
-                  children: [
-                    Image.network(
-                      wordIconUrl,
-                      width: 60,
-                      height: 60,
-                    ),
-                    const SizedBox(height: 4),
-                    const Text('Word'),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Image.network(
-                      pdfIconUrl,
-                      width: 60,
-                      height: 60,
-                    ),
-                    const SizedBox(height: 4),
-                    const Text('PDF'),
-                  ],
-                ),
-              ],
+              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             Expanded(
@@ -92,14 +55,20 @@ class AgeSelectionScreen extends StatelessWidget {
                   final imagePath = option['image'] ?? '';
 
                   return GestureDetector(
-                    // from here the data is send to the 2nd screen
                     onTap: () {
+                      // Prepare sample books for the selected age and type
+                      final sampleBooks = [
+                        {'name': 'Book 1'},
+                        {'name': 'Book 2'},
+                        {'name': 'Book 3'},
+                      ];
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => BookListScreen(
-                            ageRange: age,
-                            fileType: type,
+                          builder: (context) => BookScreen(
+                            title: 'Ages $age',
+                            books: sampleBooks,
+                            pdf: type == 'PDF',
                           ),
                         ),
                       );
@@ -145,34 +114,6 @@ class AgeSelectionScreen extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-
- /// remove this, this is a temp 2ndry screen
-class BookListScreen extends StatelessWidget {
-  final String ageRange;
-  final String fileType;
-
-  const BookListScreen({
-    Key? key,
-    required this.ageRange,
-    required this.fileType,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('$fileType Books - Ages $ageRange'),
-      ),
-      body: Center(
-        child: Text(
-          'This is the book list screen for $fileType, ages $ageRange.\nYour partner can build here.',
-          textAlign: TextAlign.center,
         ),
       ),
     );
