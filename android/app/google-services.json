@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "118212491921",
+    "firebase_url": "https://booklibrary-db17d-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "booklibrary-db17d",
+    "storage_bucket": "booklibrary-db17d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:118212491921:android:75998df4fd09e30111dd30",
+        "android_client_info": {
+          "package_name": "ibrahim.abdallah"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAj3QvwjJ5ZpGC0PtVMwU3WEsmjvPWMs6E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
