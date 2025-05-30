@@ -36,7 +36,7 @@ class BookScreen extends StatelessWidget {
                 final book = books[index];
                 return ListTile(
                   leading: CircleAvatar(
-                    backgroundImage: const AssetImage('assets/app_icon.png'),
+                    backgroundImage: const AssetImage('assets/images/app_icon.png'),
                   ),
                   title: Text(book['name'] ?? ''),
                   trailing: ElevatedButton(
