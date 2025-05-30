@@ -1,22 +1,33 @@
+import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'BookScreen.dart';
 
-void main() {
-  runApp(ChildBookApp());
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(const ChildBookApp());
 }
 
+
 class ChildBookApp extends StatelessWidget {
+  const ChildBookApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Child Book App',
-      home: AgeSelectionScreen(),
+      home: const AgeSelectionScreen(),
     );
   }
 }
 
 class AgeSelectionScreen extends StatelessWidget {
-  final List<Map<String, String>> options = [
+  const AgeSelectionScreen({super.key});
+
+  final List<Map<String, String>> options = const [
     {'age': '0-4', 'type': 'Word', 'image': 'assets/images/ages_0_4.png'},
     {'age': '0-4', 'type': 'PDF', 'image': 'assets/images/ages_0_4.png'},
     {'age': '4-8', 'type': 'Word', 'image': 'assets/images/ages_4_8.png'},
@@ -50,28 +61,38 @@ class AgeSelectionScreen extends StatelessWidget {
                 ),
                 itemBuilder: (context, index) {
                   final option = options[index];
-                  final age = option['age'] ?? '';
-                  final type = option['type'] ?? '';
-                  final imagePath = option['image'] ?? '';
+                  final age = option['age']!;
+                  final type = option['type']!;
+                  final imagePath = option['image']!;
 
                   return GestureDetector(
-                    onTap: () {
-                      // Prepare sample books for the selected age and type
-                      final sampleBooks = [
-                        {'name': 'Book 1'},
-                        {'name': 'Book 2'},
-                        {'name': 'Book 3'},
-                      ];
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => BookScreen(
-                            title: 'Ages $age',
-                            books: sampleBooks,
-                            pdf: type == 'PDF',
+                    onTap: () async {
+                      try {
+                        final ageGroup = age.replaceAll('-', '_'); // e.g., 0_4
+                        final books = await fetchBooksFromFirebase(ageGroup, type)
+                            .timeout(const Duration(seconds: 5), onTimeout: () {
+                          throw Exception('Firebase request timed out');
+                        });
+
+                        if (!context.mounted) return;
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BookScreen(
+                              title: 'Ages $age',
+                              books: books,
+                              pdf: type == 'PDF',
+                            ),
                           ),
-                        ),
-                      );
+                        );
+                      } catch (e) {
+                        developer.log('Error fetching books: $e');
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Error: $e')),
+                        );
+                      }
                     },
                     child: Card(
                       shape: RoundedRectangleBorder(
@@ -117,5 +138,37 @@ class AgeSelectionScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<List<Map<String, String>>> fetchBooksFromFirebase(
+      String ageGroup, String fileType) async {
+    DatabaseReference ref = FirebaseDatabase.instance.ref(ageGroup);
+
+    DatabaseEvent event;
+    try {
+      event = await ref.once().timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          throw Exception('Firebase request timed out');
+        },
+      );
+    } catch (e) {
+      throw Exception('Firebase error: $e');
+    }
+
+    if (!event.snapshot.exists || event.snapshot.value == null) {
+      throw Exception('No data found for $ageGroup');
+    }
+
+    final data = Map<String, dynamic>.from(event.snapshot.value as Map);
+    List<Map<String, String>> books = [];
+
+    data.forEach((storyName, formats) {
+      final formatLinks = Map<String, dynamic>.from(formats);
+      final link = formatLinks[fileType];
+      books.add({'name': storyName, 'url': link});
+    });
+
+    return books;
   }
 }

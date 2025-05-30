@@ -9,6 +9,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  firebase_core: ^2.27.0  # ✅ update to the latest stable
+  firebase_database: ^10.4.0  # ✅ update to the latest stable
+  url_launcher: ^6.2.5  # ✅ update to the latest stable
+
+
 
 dev_dependencies:
   flutter_test:
