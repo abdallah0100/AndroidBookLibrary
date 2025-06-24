@@ -12,7 +12,11 @@ dependencies:
   firebase_core: ^2.27.0  # ✅ update to the latest stable
   firebase_database: ^10.4.0  # ✅ update to the latest stable
   url_launcher: ^6.2.5  # ✅ update to the latest stable
-
+  ## this is for the download
+  dio: ^5.4.0
+  path_provider: ^2.1.2
+  open_file: ^3.3.2
+  permission_handler: ^11.3.1
 
 
 dev_dependencies:

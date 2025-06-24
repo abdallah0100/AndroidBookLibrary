@@ -4,13 +4,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'BookScreen.dart';
 
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(const ChildBookApp());
 }
-
 
 class ChildBookApp extends StatelessWidget {
   const ChildBookApp({super.key});
@@ -39,7 +37,56 @@ class AgeSelectionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Child Book App')),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(120),
+        child: AppBar(
+          elevation: 4,
+          automaticallyImplyLeading: false,
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.blue, Colors.lightBlueAccent],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(24),
+                bottomRight: Radius.circular(24),
+              ),
+            ),
+            child: SafeArea(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(Icons.book_rounded, size: 32, color: Colors.white),
+                    SizedBox(height: 6),
+                    Text(
+                      'Child Book Library',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Text(
+                      'Tap to explore or download your book!',
+                      style: TextStyle(fontSize: 12, color: Colors.white70),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          backgroundColor: Colors.transparent,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(24),
+              bottomRight: Radius.circular(24),
+            ),
+          ),
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -68,7 +115,7 @@ class AgeSelectionScreen extends StatelessWidget {
                   return GestureDetector(
                     onTap: () async {
                       try {
-                        final ageGroup = age.replaceAll('-', '_'); // e.g., 0_4
+                        final ageGroup = age.replaceAll('-', '_');
                         final books = await fetchBooksFromFirebase(ageGroup, type)
                             .timeout(const Duration(seconds: 5), onTimeout: () {
                           throw Exception('Firebase request timed out');
@@ -123,7 +170,7 @@ class AgeSelectionScreen extends StatelessWidget {
                             type,
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.grey[600],
+                              color: Colors.grey,
                             ),
                           ),
                           const SizedBox(height: 8),
