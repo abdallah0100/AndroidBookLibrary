@@ -5,11 +5,13 @@ import 'package:firebase_database/firebase_database.dart';
 import 'BookScreen.dart';
 
 Future<void> main() async {
+  // Ensure Flutter is initialized before using Firebase
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(const ChildBookApp());
 }
 
+// Main app widget
 class ChildBookApp extends StatelessWidget {
   const ChildBookApp({super.key});
 
@@ -22,9 +24,11 @@ class ChildBookApp extends StatelessWidget {
   }
 }
 
+// Age selection and book type screen
 class AgeSelectionScreen extends StatelessWidget {
   const AgeSelectionScreen({super.key});
 
+  // Each option combines an age range, file type, and image path
   final List<Map<String, String>> options = const [
     {'age': '0-4', 'type': 'Word', 'image': 'assets/images/ages_0_4.png'},
     {'age': '0-4', 'type': 'PDF', 'image': 'assets/images/ages_0_4.png'},
@@ -97,6 +101,7 @@ class AgeSelectionScreen extends StatelessWidget {
               style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
+            // Display age options in a grid
             Expanded(
               child: GridView.builder(
                 itemCount: options.length,
@@ -115,7 +120,10 @@ class AgeSelectionScreen extends StatelessWidget {
                   return GestureDetector(
                     onTap: () async {
                       try {
+                        // Format age group key for Firebase path
                         final ageGroup = age.replaceAll('-', '_');
+
+                        // Fetch books from Firebase for selected age and type
                         final books = await fetchBooksFromFirebase(ageGroup, type)
                             .timeout(const Duration(seconds: 5), onTimeout: () {
                           throw Exception('Firebase request timed out');
@@ -123,6 +131,7 @@ class AgeSelectionScreen extends StatelessWidget {
 
                         if (!context.mounted) return;
 
+                        // Navigate to book list screen
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -134,6 +143,7 @@ class AgeSelectionScreen extends StatelessWidget {
                           ),
                         );
                       } catch (e) {
+                        // Log and display error
                         developer.log('Error fetching books: $e');
                         if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -187,6 +197,7 @@ class AgeSelectionScreen extends StatelessWidget {
     );
   }
 
+  // Retrieves book list from Firebase Realtime Database
   Future<List<Map<String, String>>> fetchBooksFromFirebase(
       String ageGroup, String fileType) async {
     DatabaseReference ref = FirebaseDatabase.instance.ref(ageGroup);
@@ -203,10 +214,12 @@ class AgeSelectionScreen extends StatelessWidget {
       throw Exception('Firebase error: $e');
     }
 
+    // If no data exists at the path, raise an error
     if (!event.snapshot.exists || event.snapshot.value == null) {
       throw Exception('No data found for $ageGroup');
     }
 
+    // Convert raw Firebase data into a structured book list
     final data = Map<String, dynamic>.from(event.snapshot.value as Map);
     List<Map<String, String>> books = [];
 
