@@ -7,8 +7,8 @@ plugins {
 
 android {
     namespace = "com.example.book_library"  // this is your internal code namespace
-    compileSdk = 34
-    ndkVersion = "26.3.11579264"  // ✅ stick with the NDK you already have installed
+    compileSdk = 35
+    ndkVersion = "27.0.12077973"  // ✅ stick with the NDK you already have installed
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

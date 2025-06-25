@@ -22,9 +22,13 @@ class BookScreen extends StatefulWidget {
 }
 
 class _BookScreenState extends State<BookScreen> {
+  // Keeps track of which files are being downloaded
   Map<String, bool> downloading = {};
+
+  // Tracks which files have already been downloaded
   Map<String, bool> downloaded = {};
 
+  // Returns the path to the device's download folder
   Future<String> getDownloadPath() async {
     if (Platform.isAndroid) {
       return '/storage/emulated/0/Download';
@@ -34,6 +38,7 @@ class _BookScreenState extends State<BookScreen> {
     }
   }
 
+  // Checks which books already exist in the download folder
   Future<void> _checkDownloads() async {
     final path = await getDownloadPath();
     for (var book in widget.books) {
@@ -44,9 +49,26 @@ class _BookScreenState extends State<BookScreen> {
     setState(() {});
   }
 
+  // Handles storage permission for both Android 10 and Android 11+
+  Future<bool> _requestStoragePermission() async {
+    if (!Platform.isAndroid) return true;
+
+    if (await Permission.manageExternalStorage.isGranted ||
+        await Permission.storage.isGranted) {
+      return true;
+    }
+
+    final status = await Permission.manageExternalStorage.request();
+    if (status.isGranted) return true;
+
+    final fallback = await Permission.storage.request();
+    return fallback.isGranted;
+  }
+
+  // Downloads a file from the given URL and saves it to the download folder
   Future<void> _downloadFile(String url, String name) async {
-    final status = await Permission.storage.request();
-    if (!status.isGranted) {
+    final granted = await _requestStoragePermission();
+    if (!granted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Storage permission denied')),
       );
@@ -63,7 +85,7 @@ class _BookScreenState extends State<BookScreen> {
 
       downloaded[name] = true;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Download completed')),
+        SnackBar(content: Text('Downloaded to: $filePath')),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -74,6 +96,7 @@ class _BookScreenState extends State<BookScreen> {
     }
   }
 
+  // Opens a downloaded file using the system default app
   Future<void> _openFile(String name) async {
     final path = await getDownloadPath();
     final filePath = '$path/$name.${widget.pdf ? "pdf" : "docx"}';
@@ -83,7 +106,8 @@ class _BookScreenState extends State<BookScreen> {
   @override
   void initState() {
     super.initState();
-    _checkDownloads();
+    // Delays the check until after build to avoid UI issues
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkDownloads());
   }
 
   @override
@@ -149,7 +173,8 @@ class _BookScreenState extends State<BookScreen> {
                   margin: const EdgeInsets.symmetric(vertical: 8),
                   child: ListTile(
                     leading: const CircleAvatar(
-                      backgroundImage: AssetImage('assets/images/app_icon.png'),
+                      backgroundImage:
+                          AssetImage('assets/images/app_icon.png'),
                       backgroundColor: Colors.white,
                     ),
                     title: Text(
@@ -204,7 +229,8 @@ class _BookScreenState extends State<BookScreen> {
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                      content: Text('Upload Book functionality not implemented')),
+                    content: Text('Upload Book functionality not implemented'),
+                  ),
                 );
               },
               style: ElevatedButton.styleFrom(
